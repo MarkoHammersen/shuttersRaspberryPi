@@ -6,7 +6,7 @@
 
 #define T_STUCK (4u)
 
-button::button(char const *name, IoPi *io, uint32_t u, uint32_t d)
+button::button(char const *name, IoPi *io, uint8_t u, uint8_t d)
 {
   this->name = name;
   timerStuck = 0;

@@ -37,7 +37,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{c03cecff-625b-4fb9-bfa8-395ef3b93e42}</ProjectGuid>
     <Keyword>Linux</Keyword>
-    <RootNamespace>shutterControlRaspberryPi</RootNamespace>
+    <RootNamespace>shutters</RootNamespace>
     <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
     <ApplicationType>Linux</ApplicationType>
     <ApplicationTypeRevision>1.0</ApplicationTypeRevision>
@@ -74,6 +74,12 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <OutDir>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\</IntDir>
+    <RemoteProjectDir>$(RemoteRootDir)/$(ProjectName)</RemoteProjectDir>
+    <RemoteDeployDir>$(RemoteProjectDir)</RemoteDeployDir>
+  </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\ABElectronics_CPP_Libraries\I2CSwitch\ABE_I2CSwitch.cpp" />
     <ClCompile Include="..\ABElectronics_CPP_Libraries\IOPi\ABE_IoPi.cpp" />
@@ -97,10 +103,17 @@
     <ClCompile>
       <AdditionalIncludeDirectories>..\ABElectronics_CPP_Libraries\IOPi;..\ABElectronics_CPP_Libraries\I2CSwitch;..\hsm\cpp;..\I2CRelayModule;..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>OLD_WAY</PreprocessorDefinitions>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <Link>
       <LibraryDependencies>wiringPi</LibraryDependencies>
     </Link>
+    <RemotePostBuildEvent>
+      <Command>gpio export 17 out</Command>
+    </RemotePostBuildEvent>
+    <RemotePostBuildEvent>
+      <Message>xportieren Sie Pin 17 mit dem GPIO-Hilfsprogramm, damit das Blink-Programm ohne "sudo" ausgeführt werden kann.</Message>
+    </RemotePostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

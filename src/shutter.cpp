@@ -7,7 +7,7 @@
 #include "i2cRelayModule.h"
 #include "shutter.h"
 
-#define T_DEBOUNCE (1u)
+#define T_DEBOUNCE (1)
 
 #define trace(a) assert(name != NULL);printf(name);printf(": ");printf(a);
 

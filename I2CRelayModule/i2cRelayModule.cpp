@@ -54,16 +54,16 @@ I2cRelayModule::I2cRelayModule(uint8_t addr)
   
   data[0u] = 0x00u; // register A
   data[1u] = 0x00u; // set all of port A to outputs
-  writeData(data, 2u);
+  writeData(data, 2);
 
   data[0u] = 0x01u; // register B
   data[1u] = 0x00u; // set all of port B to outputs
-  writeData(data, 2u);
+  writeData(data, 2);
   
   setAll(OFF);
 }
 
-void I2cRelayModule::writeData(uint8_t data[], uint32_t count)
+void I2cRelayModule::writeData(uint8_t data[], int32_t count)
 {
   /**
   * private method for writing a byte to the I2C port
@@ -123,7 +123,7 @@ void I2cRelayModule::changeMode(uint8_t relay, uint16_t mode)
     return;
   }
 
-  modeWord.w &= ~(1 << (relay));
+  modeWord.w &= ~(1u << (relay));
   modeWord.w |= mode << relay;
 
   variable_LOW = modeWord.b[0u];
@@ -131,11 +131,11 @@ void I2cRelayModule::changeMode(uint8_t relay, uint16_t mode)
 
   data[0u] = 0x12u;  // address bank A
   data[1u] = variable_LOW;
-  writeData(data, 2u);
+  writeData(data, 2);
 
   data[0u] = 0x13u;  // address bank B
   data[1u] = variable_HIGH;
-  writeData(data, 2u);
+  writeData(data, 2);
 }
 
 //
@@ -165,9 +165,9 @@ void I2cRelayModule::setAll(uint16_t mode)
 
   data[0u] = 0x12u; // address bank A
   data[1u] = variable_LOW;
-  writeData(data, 2u);
+  writeData(data, 2);
 
   data[0u] = 0x13u; // address bank B
   data[1u] = variable_HIGH;
-  writeData(data, 2u);
+  writeData(data, 2);
 }

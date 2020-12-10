@@ -11,7 +11,7 @@ const uint16_t OFF = 0u;
 class I2cRelayModule 
 {
 protected:
-  void writeData(uint8_t data[], uint32_t count);
+  void writeData(uint8_t data[], int32_t count);
 
   uint8_t i2caddress; // I2C address
   BYTE_TO_WORD modeWord;
