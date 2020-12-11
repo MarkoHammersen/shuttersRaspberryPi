@@ -14,8 +14,7 @@
 #include "i2cRelayModule.h"
 
 #include "button.h"
-#include "shutter.h"
-#include "window.h"
+#include "Shutter.h"
 
 
 int initI2CSwitch(unsigned char address)
@@ -50,6 +49,9 @@ int initI2CSwitch(unsigned char address)
 
 static void doSleep(uint32_t ms)
 {
+#ifdef _WIN32
+    Sleep(ms);
+#else
     struct timeval t1;
     struct timeval t2;
     long long elapsedTimeInUs;
@@ -57,15 +59,16 @@ static void doSleep(uint32_t ms)
     gettimeofday(&t1, NULL);
     while (1)
     {
-        sleep(1);
+        usleep((ms * 1000u) / 20u);
         gettimeofday(&t2, NULL);
-        elapsedTimeInUs = ((t2.tv_sec * 1000000) + t2.tv_usec)
-            - ((t1.tv_sec * 1000000) + t1.tv_usec);
-        if (elapsedTimeInUs > (ms * 1000u))
+        elapsedTimeInUs = ((static_cast<long long>(t2.tv_sec) * 1000000) + t2.tv_usec)
+            - ((static_cast<long long>(t1.tv_sec) * 1000000) + t1.tv_usec);
+        if (elapsedTimeInUs > (static_cast<long long>(ms) * 1000u))
         {
             break;
         }
     }
+#endif
 }
 
 int main()
@@ -97,65 +100,65 @@ int main()
   busInput2.set_port_pullups(1, 0xFF);   // enable internal pullups for bank 0
   busInput2.invert_port(1, 0xFF);		  // invert output so bank will read as 0
 
-  button all("AllShuttersButton", &busInput1, 11u, 12u);
+  Button all(&busInput1, 11u, 12u);
 
-  window hall("hall",
+  Shutter hall("hall",
     &busInput1, 1u, 2u,
     &relayBoard1, 1u, 2u,
     1500u);
 /*
   window bathroom("bathroom",
     &busInput1, 3u, 4u,
-    1500u);
+    15000u/timeBase);
 
   window dirtlock("dirtlock",
     &busInput1, 5u, 6u,
-    1500u);
+    15000u/timeBase);
 
   window westDoor("westDoor",
     &busInput1, 7u, 8u,
-    1500u);
+    15000u/timeBase);
 
   window westWindow("westWindow",
     &busInput1, 9u, 10u,
-    1500u);
+    15000u/timeBase);
 
   window northWindow("northWindow",
     &busInput1, 11u, 12u,
-    1500u);
+    15000u/timeBase);
 
   window eastWindowSmall("eastWindowSmall",
     &busInput1, 13u, 14u,
-    1500u);
+    15000u/timeBase);
 
   window northDoor("northDoor",
     &busInput1, 15u, 16u,
-    1500u);
+    15000u/timeBase);
 
   window eastWindowDining("eastWindowDining",
     &busInput2, 1u, 2u,
-    1500u);
+    15000u/timeBase);
 
   window eastWindowKitchen("eastWindowKitchen",
     &busInput2, 3u, 4u,
-    1500u);
+    15000u/timeBase);
 
   window eastDoor("eastDoor",
     &busInput2, 5u, 6u,
-    1500u);
+    15000u/timeBase);
 
   window southWindowLarge("southWindowLarge",
     &busInput2, 7u, 8u,
-    1500u);
+    15000u/timeBase);
 
   window southWindowSmall("southWindowSmall",
     &busInput2, 9u, 10u,
-    1500u);*/
+    15000u/timeBase);*/
 
   while (1u)
   {
     // get status of broadcast input
-    buttonEvents_t AllWindowsSig = all.getSignal();
+    ButtonEvent AllWindowsSig = all.getSignal();
 
     hall.tick(AllWindowsSig);
     //bathroom.tick(AllWindowsSig);
@@ -171,11 +174,7 @@ int main()
     //southWindowLarge.tick(AllWindowsSig);
     //southWindowSmall.tick(AllWindowsSig);
 
-#ifdef _WIN32
-    Sleep(10u);
-#else
-    doSleep(10u); // in ms
-#endif
+    doSleep(timeBase); // in ms
   }
 
   return 0;

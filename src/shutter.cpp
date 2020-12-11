@@ -5,51 +5,60 @@
 #include "button.h"
 #include "hsm.h"
 #include "i2cRelayModule.h"
-#include "shutter.h"
-
-#define T_DEBOUNCE (1)
+#include "Shutter.h"
 
 #define trace(a) assert(name != NULL);printf(name);printf(": ");printf(a);
 
-shutter::shutter(const char *name, 
-  I2cRelayModule *dev,
-  uint8_t u,
-  uint8_t d,
-  int32_t timoutShutter)
-  : Hsm(name, (EvtHndlr)&shutter::topHandler),
-  stStop(   "Stop",     &top, (EvtHndlr)&shutter::stopHandler),
-  stUp(     "Up",       &top, (EvtHndlr)&shutter::upHandler),
-  stDown(   "Down",     &top, (EvtHndlr)&shutter::downHandler),
-  stRunning("Running",  &top, (EvtHndlr)&shutter::runningHandler)
+static const Msg ShutterMsgs[] =
+{
+  static_cast <Event>(ShutterEvent::TickEvt)
+};
+
+Shutter::Shutter(char const* name,
+  IoPi* buttonIoPi,
+  uint8_t pinButtonUp,
+  uint8_t pinButtonDown,
+  I2cRelayModule* relayModule,
+  uint8_t relayUp,
+  uint8_t relayDown,
+  int32_t timoutShutter): Hsm(name, (EvtHndlr)&Shutter::topHandler),
+  stUp(     "Up",       &top, (EvtHndlr)&Shutter::upHandler),
+  stDown(   "Down",     &top, (EvtHndlr)&Shutter::downHandler),
+  stRunning("Running",  &top, (EvtHndlr)&Shutter::runningHandler),
+  stStop(   "Stop",     &top, (EvtHndlr)&Shutter::stopHandler),
+  stIdle("idle", &top, (EvtHndlr)&Shutter::idleHandler),
+  Button(buttonIoPi, pinButtonUp, pinButtonDown)
 {
   this->name = name;
   
   tRunning = 0u;
   tDebounce = 0u;
-
-  assert(NULL != dev);
-  relayModule = dev;
-  up = u;
-  down = d;
-  assert(timoutShutter > T_DEBOUNCE);
+  tStopDebounce = 0u;
   timeout = timoutShutter;
 
+  currentBtnEvt = ButtonEvent::ReleaseEvt;
+
+  this->relayModule = relayModule;
+  this->relayUp = relayUp;
+  this->relayDown = relayDown;
 }
 
-Msg const *shutter::downHandler(Msg const *msg)
+Msg const *Shutter::downHandler(Msg const *msg)
 {
-  switch (msg->evt) 
+  switch (msg->evt)
   {
   case START_EVT:
     trace("down-INIT\n");
+    tDebounce = 0;
     return 0;
 
   case ENTRY_EVT:
     trace("down-ENTRY\n");
     if (NULL != relayModule)
     {
-      relayModule->changeMode(up, OFF);
-      relayModule->changeMode(down, ON);
+      relayModule->changeMode(relayUp, OFF);
+      relayModule->changeMode(relayDown, ON);
+      tDebounce = 0u;
     }
     return 0;
 
@@ -58,10 +67,14 @@ Msg const *shutter::downHandler(Msg const *msg)
     return 0;
 
   default:
-    tDebounce++;
-    if (tDebounce >= T_DEBOUNCE)
+    if (ButtonEvent::UpEvt == currentBtnEvt)
     {
-      tDebounce = 0;
+      STATE_TRAN(&stStop);
+      return 0;
+    }
+    tDebounce++;
+    if (tDebounce >= (timeMaxDebounce/timeBase)) // ticks
+    {
       STATE_TRAN(&stRunning);
     }
     return 0;
@@ -69,69 +82,74 @@ Msg const *shutter::downHandler(Msg const *msg)
   return msg;
 }
 
-Msg const *shutter::stopHandler(Msg const *msg)
-{
-  switch (msg->evt) 
-  {
-  case START_EVT:
-    trace("stop-INIT\n");
-    return 0;
-  
-  case ENTRY_EVT:
-    trace("stop-ENTRY\n");
-    relayModule->changeMode(up, OFF);
-    relayModule->changeMode(down, OFF);
-    return 0;
-  
-  case EXIT_EVT:
-    trace("stop-EXIT\n");
-    return 0;
-
-  case PressDownEvt:
-    STATE_TRAN(&stDown);
-    return 0;
-
-  case PressUpEvt:
-    STATE_TRAN(&stUp);
-    return 0;
-  }
-  return msg;
-}
-
-Msg const *shutter::runningHandler(Msg const *msg)
+Msg const* Shutter::stopHandler(Msg const* msg)
 {
   switch (msg->evt)
   {
   case START_EVT:
-    trace("running-INIT\n");
+    trace("idle-INIT\n");
     return 0;
 
   case ENTRY_EVT:
-    trace("running-ENTRY\n");
-    tRunning = 0u;
+    trace("idle-ENTRY\n");
+    relayModule->changeMode(relayUp, OFF);
+    relayModule->changeMode(relayDown, OFF);
+    tStopDebounce = 0;
     return 0;
 
   case EXIT_EVT:
-    trace("running-EXIT\n");
+    trace("idle-EXIT\n");
     return 0;
-
-  case PressDownEvt:
-  case PressUpEvt:
-    STATE_TRAN(&stStop);
-    return 0;
-  default:
-    tRunning++;
-    if (tRunning >= (timeout - T_DEBOUNCE))
+  
+  case static_cast <Event>(ShutterEvent::TickEvt):
+    if (tStopDebounce > (timeMaxDebounce / timeBase)) // ticks
     {
-      tRunning = 0u;
-      STATE_TRAN(&stStop);
+      STATE_TRAN(&stIdle);
+    }
+    else
+    {
+      tStopDebounce++;
     }
     return 0;
   }
   return msg;
 }
 
-Msg const *shutter::upHandler(Msg const *msg)
+Msg const *Shutter::idleHandler(Msg const *msg)
+{
+  switch (msg->evt)
+  {
+  case START_EVT:
+    trace("idle-INIT\n");
+    return 0;
+
+  case ENTRY_EVT:
+    trace("idle-ENTRY\n");
+    return 0;
+
+  case EXIT_EVT:
+    trace("idle-EXIT\n");
+    return 0;
+
+    case static_cast<Event>(ShutterEvent::TickEvt) :
+    {
+      if (ButtonEvent::UpEvt == currentBtnEvt)
+      {
+        STATE_TRAN(&stUp);
+        return 0;
+      }
+
+      if (ButtonEvent::DownEvt == currentBtnEvt)
+      {
+        STATE_TRAN(&stDown);
+        return 0;
+      }
+    }
+  }
+  return msg;
+}
+
+Msg const *Shutter::upHandler(Msg const *msg)
 {
   switch (msg->evt) 
   {
@@ -141,8 +159,9 @@ Msg const *shutter::upHandler(Msg const *msg)
 
   case ENTRY_EVT:
     trace("up-ENTRY\n");
-    relayModule->changeMode(down, OFF);
-    relayModule->changeMode(up, ON);
+    relayModule->changeMode(relayDown, OFF);
+    relayModule->changeMode(relayUp, ON);
+    tDebounce = 0u;
     return 0;
 
   case EXIT_EVT:
@@ -150,23 +169,33 @@ Msg const *shutter::upHandler(Msg const *msg)
     return 0;
 
   default:
-    tDebounce++;
-    if (tDebounce >= T_DEBOUNCE)
+  {
+    if (ButtonEvent::DownEvt == currentBtnEvt)
     {
-      tDebounce = 0;
+      STATE_TRAN(&stStop);
+      return 0;
+    }
+
+    tDebounce++;
+    if (tDebounce >= (timeMaxDebounce / timeBase)) // ticks
+    {
       STATE_TRAN(&stRunning);
     }
+  }
     return 0;
   }
   return msg;
 }
 
-Msg const *shutter::topHandler(Msg const *msg) 
+Msg const *Shutter::topHandler(Msg const *msg) 
 {
   switch (msg->evt) {
   case START_EVT:
     trace("top-INIT\n");
-    STATE_START(&stStop);
+    if (NULL != relayModule)
+    {
+      STATE_START(&stStop);
+    }
     return 0;
   case ENTRY_EVT:
     trace("top-ENTRY\n");
@@ -176,4 +205,47 @@ Msg const *shutter::topHandler(Msg const *msg)
     return 0;
   }
   return msg;
+}
+
+Msg const* Shutter::runningHandler(Msg const* msg)
+{
+  switch (msg->evt) {
+  case START_EVT:
+    trace("running-INIT\n");
+    return 0;
+  case ENTRY_EVT:
+    trace("running-ENTRY\n");
+    tRunning = 0u;
+    return 0;
+  case EXIT_EVT:
+    trace("running-EXIT\n");
+    return 0;
+  default:
+    if (ButtonEvent::ReleaseEvt != currentBtnEvt)
+    {
+      STATE_TRAN(&stStop);
+      return 0;
+    }
+
+    tRunning++;
+    if (tRunning >= timeout) // ticks
+    {
+      STATE_TRAN(&stStop);
+    }
+    return 0;
+  }
+  return msg;
+}
+
+void Shutter::tick(ButtonEvent all)
+{
+  if (ButtonEvent::ReleaseEvt == all)
+  {
+    currentBtnEvt = getSignal();
+  }
+  else
+  {
+    currentBtnEvt = all;
+  }
+  onEvent(&ShutterMsgs[static_cast <Event>(ShutterEvent::TickEvt)]);
 }

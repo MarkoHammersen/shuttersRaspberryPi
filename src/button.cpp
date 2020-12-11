@@ -1,63 +1,51 @@
 #include <stdint.h>
 #include <assert.h>
-#include <stdio.h>
 #include "ABE_IoPi.h"
 #include "button.h"
 
-#define T_STUCK (4u)
-
-button::button(char const *name, IoPi *io, uint8_t u, uint8_t d)
+Button::Button(IoPi *io, uint8_t u, uint8_t d)
 {
-  this->name = name;
-  timerStuck = 0;
-  lastEvent = ReleaseEvt;
+  myIoPi = NULL;
+  pinButtonDown = 0xFFu;
+  pinButtonUp = 0xFFu;
 
-  assert(NULL != io);
-  assert((u <= 16) && (u >= 1));
-  assert((d <= 16) && (d >= 1));
-
-  myIoPi = io;
-  pinUp = u;
-  pinDown = d;
+  if (NULL != io)
+  {
+    if ((u <= 16) && (u >= 1))
+    {
+      if ((d <= 16) && (d >= 1))
+      {
+        myIoPi = io;
+        pinButtonUp = u;
+        pinButtonDown = d;
+      }
+    }
+  }  
 }
 
-buttonEvents_t button::getSignal()
+ButtonEvent Button::getSignal()
 {
-  assert(NULL != myIoPi);
-
-  uint8_t up = myIoPi->read_pin(pinUp);
-  uint8_t down = myIoPi->read_pin(pinDown);
-
-  if ((1u == up) && (ReleaseEvt == lastEvent))
+  if (NULL != myIoPi)
   {
-    // up pressed 
-    lastEvent = PressUpEvt;
-    return PressUpEvt;
-  }
+    uint8_t up = myIoPi->read_pin(pinButtonUp);
+    uint8_t down = myIoPi->read_pin(pinButtonDown);
 
-  if (1u == up) 
-  {
-    // up held
-    lastEvent = HoldUpEvt;
-    return HoldUpEvt;
-  }
-  
-  if ((1u == down) && (ReleaseEvt == lastEvent))
-  {
-    // down pressed
-    lastEvent = PressDownEvt;
-    return PressDownEvt;
-  }
+    if (1u == up)
+    {
+      // up pressed 
+      return ButtonEvent::UpEvt;
+    }
 
-  if (1u == down) 
-  {
-    // down held
-    lastEvent = HoldDownEvt;
-    return HoldDownEvt;
+    if (1u == down)
+    {
+      // down pressed
+      return ButtonEvent::DownEvt;
+    }
+
+    // released
+    return ButtonEvent::ReleaseEvt;
   }
 
   // released
-  lastEvent = ReleaseEvt;
-  return ReleaseEvt;
-  
+  return ButtonEvent::ReleaseEvt;
 }

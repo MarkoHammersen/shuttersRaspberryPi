@@ -10,5 +10,8 @@ The code controlling the I2c-Relay Modules has been customized from the sample c
 
 Setup:
 Stack I2C switch on IoPiPlus on RaspberryPi.
-Connect I2C lines of rlay Module to I2CSwitch.
+Connect I2C lines of relay module to I2CSwitch.
 All button input (5v) lines are to be connected to the pins of the IoPi Plus.
+
+Please see FSM.png for the state machine of the shutters.
+Thanks

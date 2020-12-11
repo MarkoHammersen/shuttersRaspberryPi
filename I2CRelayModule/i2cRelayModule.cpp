@@ -11,10 +11,10 @@ apt - get install libi2c - dev
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdexcept>
+#include <errno.h>
 #include <fcntl.h>
-#include <iostream>
+#include <cstring>
 #ifndef _WIN32
 #include <unistd.h>
 #include <sys/ioctl.h>

@@ -2,27 +2,22 @@
 
 using namespace ABElectronics_CPP_Libraries;
 
-typedef enum
+enum class ButtonEvent
 {
-  PressUpEvt,
-  HoldUpEvt,
-  PressDownEvt,
-  HoldDownEvt,
+  UpEvt,
+  DownEvt,
   ReleaseEvt,
-  
-}buttonEvents_t;
+};
 
-class button
+class Button
 {
 protected:
   IoPi * myIoPi;
-  uint8_t pinUp;
-  uint8_t pinDown;
-  uint32_t timerStuck;
-  char const *name;
-  buttonEvents_t lastEvent;
+  uint8_t pinButtonUp;
+  uint8_t pinButtonDown;
+
 public:
-  button(char const *name, IoPi *io, uint8_t u, uint8_t d);
-  buttonEvents_t getSignal();
+  Button(IoPi *io, uint8_t u, uint8_t d);
+  ButtonEvent getSignal();
 };
 
