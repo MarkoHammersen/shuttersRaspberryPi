@@ -47,7 +47,7 @@ public:
     uint8_t relayUp,
     uint8_t relayDown,
     
-    int32_t timoutShutter);
+    int32_t timoutShutterInMs);
 
   void tick(ButtonEvent all);
 };

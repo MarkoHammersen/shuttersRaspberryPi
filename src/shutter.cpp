@@ -21,7 +21,7 @@ Shutter::Shutter(char const* name,
   I2cRelayModule* relayModule,
   uint8_t relayUp,
   uint8_t relayDown,
-  int32_t timoutShutter): Hsm(name, (EvtHndlr)&Shutter::topHandler),
+  int32_t timoutShutterInMs): Hsm(name, (EvtHndlr)&Shutter::topHandler),
   stUp(     "Up",       &top, (EvtHndlr)&Shutter::upHandler),
   stDown(   "Down",     &top, (EvtHndlr)&Shutter::downHandler),
   stRunning("Running",  &top, (EvtHndlr)&Shutter::runningHandler),
@@ -34,7 +34,7 @@ Shutter::Shutter(char const* name,
   tRunning = 0u;
   tDebounce = 0u;
   tStopDebounce = 0u;
-  timeout = timoutShutter;
+  timeout = timoutShutterInMs;
 
   currentBtnEvt = ButtonEvent::ReleaseEvt;
 
@@ -49,7 +49,6 @@ Msg const *Shutter::downHandler(Msg const *msg)
   {
   case START_EVT:
     trace("down-INIT\n");
-    tDebounce = 0;
     return 0;
 
   case ENTRY_EVT:
@@ -72,8 +71,8 @@ Msg const *Shutter::downHandler(Msg const *msg)
       STATE_TRAN(&stStop);
       return 0;
     }
-    tDebounce++;
-    if (tDebounce >= (timeMaxDebounce/timeBase)) // ticks
+    tDebounce += timeBase;
+    if (tDebounce >= timeMaxDebounce) // ticks
     {
       STATE_TRAN(&stRunning);
     }
@@ -102,13 +101,13 @@ Msg const* Shutter::stopHandler(Msg const* msg)
     return 0;
   
   case static_cast <Event>(ShutterEvent::TickEvt):
-    if (tStopDebounce > (timeMaxDebounce / timeBase)) // ticks
+    if (tStopDebounce > timeMaxDebounce) // ticks
     {
       STATE_TRAN(&stIdle);
     }
     else
     {
-      tStopDebounce++;
+      tStopDebounce += timeBase;
     }
     return 0;
   }
@@ -176,8 +175,8 @@ Msg const *Shutter::upHandler(Msg const *msg)
       return 0;
     }
 
-    tDebounce++;
-    if (tDebounce >= (timeMaxDebounce / timeBase)) // ticks
+    tDebounce += timeBase;
+    if (tDebounce >= timeMaxDebounce ) // ticks
     {
       STATE_TRAN(&stRunning);
     }
@@ -227,8 +226,8 @@ Msg const* Shutter::runningHandler(Msg const* msg)
       return 0;
     }
 
-    tRunning++;
-    if (tRunning >= timeout) // ticks
+    tRunning = tRunning + timeBase;
+    if (tRunning >= timeout)
     {
       STATE_TRAN(&stStop);
     }

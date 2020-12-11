@@ -105,55 +105,55 @@ int main()
   Shutter hall("hall",
     &busInput1, 1u, 2u,
     &relayBoard1, 1u, 2u,
-    1500u);
+    15000u);
 /*
   window bathroom("bathroom",
     &busInput1, 3u, 4u,
-    15000u/timeBase);
+    15000u);
 
   window dirtlock("dirtlock",
     &busInput1, 5u, 6u,
-    15000u/timeBase);
+    15000u);
 
   window westDoor("westDoor",
     &busInput1, 7u, 8u,
-    15000u/timeBase);
+    15000u);
 
   window westWindow("westWindow",
     &busInput1, 9u, 10u,
-    15000u/timeBase);
+    15000u);
 
   window northWindow("northWindow",
     &busInput1, 11u, 12u,
-    15000u/timeBase);
+    15000u);
 
   window eastWindowSmall("eastWindowSmall",
     &busInput1, 13u, 14u,
-    15000u/timeBase);
+    15000u);
 
   window northDoor("northDoor",
     &busInput1, 15u, 16u,
-    15000u/timeBase);
+    15000u);
 
   window eastWindowDining("eastWindowDining",
     &busInput2, 1u, 2u,
-    15000u/timeBase);
+    15000u);
 
   window eastWindowKitchen("eastWindowKitchen",
     &busInput2, 3u, 4u,
-    15000u/timeBase);
+    15000u);
 
   window eastDoor("eastDoor",
     &busInput2, 5u, 6u,
-    15000u/timeBase);
+    15000u);
 
   window southWindowLarge("southWindowLarge",
     &busInput2, 7u, 8u,
-    15000u/timeBase);
+    15000u);
 
   window southWindowSmall("southWindowSmall",
     &busInput2, 9u, 10u,
-    15000u/timeBase);*/
+    15000u);*/
 
   while (1u)
   {
