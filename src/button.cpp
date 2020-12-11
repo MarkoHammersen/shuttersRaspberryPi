@@ -1,15 +1,14 @@
-#include <stdint.h>
-#include <assert.h>
+#include <cstdint>
 #include "ABE_IoPi.h"
 #include "button.h"
 
 Button::Button(IoPi *io, uint8_t u, uint8_t d)
 {
-  myIoPi = NULL;
+  myIoPi = 0;
   pinButtonDown = 0xFFu;
   pinButtonUp = 0xFFu;
 
-  if (NULL != io)
+  if (0 != io)
   {
     if ((u <= 16) && (u >= 1))
     {
@@ -25,7 +24,7 @@ Button::Button(IoPi *io, uint8_t u, uint8_t d)
 
 ButtonEvent Button::getSignal()
 {
-  if (NULL != myIoPi)
+  if (0 != myIoPi)
   {
     uint8_t up = myIoPi->read_pin(pinButtonUp);
     uint8_t down = myIoPi->read_pin(pinButtonDown);

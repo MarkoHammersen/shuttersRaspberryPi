@@ -88,7 +88,6 @@
     <ClCompile Include="src\button.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\shutter.cpp" />
-    <ClCompile Include="src\window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ABElectronics_CPP_Libraries\I2CSwitch\ABE_I2CSwitch.h" />
@@ -97,11 +96,10 @@
     <ClInclude Include="I2CRelayModule\i2cRelayModule.h" />
     <ClInclude Include="src\button.h" />
     <ClInclude Include="src\shutter.h" />
-    <ClInclude Include="src\window.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
-      <AdditionalIncludeDirectories>ABElectronics_CPP_Libraries\IOPi;ABElectronics_CPP_Libraries\I2CSwitch;hsm\cpp;I2CRelayModule;src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(ClCompile.AdditionalIncludeDirectories);ABElectronics_CPP_Libraries\IOPi;ABElectronics_CPP_Libraries\I2CSwitch;hsm\cpp;I2CRelayModule;src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>OLD_WAY</PreprocessorDefinitions>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
     </ClCompile>

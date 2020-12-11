@@ -1,21 +1,24 @@
 #include <cstdint>
-#include <assert.h>
 
 #ifdef _WIN32
 #include < windows.h>
 #else
 #include <sys/time.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #endif
 
-#include "hsm.h"
 #include "ABE_IoPi.h"
 #include "ABE_I2CSwitch.h"
 #include "i2cRelayModule.h"
 
+#include <assert.h>
+#include "hsm.h"
 #include "button.h"
-#include "Shutter.h"
+#include "shutter.h"
 
+using namespace std;
 
 int initI2CSwitch(unsigned char address)
 {
@@ -47,10 +50,11 @@ int initI2CSwitch(unsigned char address)
   return 0;
 }
 
-static void doSleep(uint32_t ms)
+static long long doSleep(uint32_t ms)
 {
 #ifdef _WIN32
     Sleep(ms);
+    return ms;
 #else
     struct timeval t1;
     struct timeval t2;
@@ -68,9 +72,27 @@ static void doSleep(uint32_t ms)
             break;
         }
     }
+    return elapsedTimeInUs;
 #endif
 }
 
+#if 1
+
+static void testTimer()
+{
+  while (1)
+  {
+    long long elapsedTimeInUs = doSleep(15000);
+    printf("t = %lld\n" , elapsedTimeInUs);
+  }
+}
+
+
+int main()
+{
+  testTimer();
+}
+#else
 int main()
 {
   IoPi busInput1(0x20u, false);
@@ -174,8 +196,9 @@ int main()
     //southWindowLarge.tick(AllWindowsSig);
     //southWindowSmall.tick(AllWindowsSig);
 
-    doSleep(timeBase); // in ms
+    (void)doSleep(timeBase); // in ms
   }
 
   return 0;
 }
+#endif

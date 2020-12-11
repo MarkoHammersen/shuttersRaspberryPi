@@ -1,6 +1,6 @@
 #pragma once
 
-const uint32_t timeBase = 10u; // in ms
+const uint32_t timeBase = 100u; // in ms
 const uint32_t timeMaxDebounce = 1000u; // in ms
 
 enum class ShutterEvent

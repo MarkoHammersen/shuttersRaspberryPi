@@ -5,7 +5,7 @@
 #include "button.h"
 #include "hsm.h"
 #include "i2cRelayModule.h"
-#include "Shutter.h"
+#include "shutter.h"
 
 #define trace(a) assert(name != NULL);printf(name);printf(": ");printf(a);
 
