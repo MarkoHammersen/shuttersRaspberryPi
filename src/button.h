@@ -2,6 +2,12 @@
 
 using namespace ABElectronics_CPP_Libraries;
 
+union AllInputs
+{
+  uint8_t b[4u];
+  uint32_t l;
+};
+
 enum class ButtonEvent
 {
   UpEvt,
@@ -9,15 +15,16 @@ enum class ButtonEvent
   ReleaseEvt,
 };
 
-class Button
+class Buttons
 {
-protected:
-  IoPi * myIoPi;
-  uint8_t pinButtonUp;
-  uint8_t pinButtonDown;
-
 public:
-  Button(IoPi *io, uint8_t u, uint8_t d);
-  ButtonEvent getSignal();
+  uint8_t pinAllUp;
+  uint8_t pinAllDown;
+  AllInputs input;
+  Buttons(uint8_t u, uint8_t d)
+  {
+    pinAllUp = u;
+    pinAllDown = d;
+  };
 };
 

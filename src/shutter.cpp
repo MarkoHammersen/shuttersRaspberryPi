@@ -2,9 +2,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include "ABE_IoPi.h"
-#include "button.h"
 #include "hsm.h"
 #include "i2cRelayModule.h"
+#include "button.h"
 #include "shutter.h"
 
 #define trace(a) assert(name != NULL);printf(name);printf(": ");printf(a);
@@ -15,7 +15,6 @@ static const Msg ShutterMsgs[] =
 };
 
 Shutter::Shutter(char const* name,
-  IoPi* buttonIoPi,
   uint8_t pinButtonUp,
   uint8_t pinButtonDown,
   I2cRelayModule* relayModule,
@@ -26,9 +25,8 @@ Shutter::Shutter(char const* name,
   stDown(   "Down",     &top, (EvtHndlr)&Shutter::downHandler),
   stRunning("Running",  &top, (EvtHndlr)&Shutter::runningHandler),
   stStop(   "Stop",     &top, (EvtHndlr)&Shutter::stopHandler),
-  stIdle("idle", &top, (EvtHndlr)&Shutter::idleHandler),
-  Button(buttonIoPi, pinButtonUp, pinButtonDown)
-{
+  stIdle("idle", &top, (EvtHndlr)&Shutter::idleHandler)
+ {
   this->name = name;
   
   tRunning = 0u;
@@ -37,6 +35,9 @@ Shutter::Shutter(char const* name,
   timeout = timoutShutterInMs;
 
   currentBtnEvt = ButtonEvent::ReleaseEvt;
+
+  this->pinButtonDown = pinButtonDown;
+  this->pinButtonUp = pinButtonUp;
 
   this->relayModule = relayModule;
   this->relayUp = relayUp;
@@ -236,15 +237,50 @@ Msg const* Shutter::runningHandler(Msg const* msg)
   return msg;
 }
 
-void Shutter::tick(ButtonEvent all)
+uint8_t Shutter::checkbit(uint32_t l, uint8_t bit)
 {
-  if (ButtonEvent::ReleaseEvt == all)
+  uint8_t ret;
+  /**
+  * private method for checking the status of a bit within a byte
+  */
+  if (l & (1 << bit))
   {
-    currentBtnEvt = getSignal();
+    ret = 1u;
   }
   else
   {
-    currentBtnEvt = all;
+    ret = 0u;
   }
+
+  return(ret);
+}
+
+void Shutter::tick(Buttons& btns)
+{
+  if (1u == checkbit(btns.input.l, btns.pinAllUp))
+  {
+    currentBtnEvt = ButtonEvent::UpEvt;
+  }
+  else if (1u == checkbit(btns.input.l, btns.pinAllDown))
+  {
+    currentBtnEvt = ButtonEvent::DownEvt;
+  }
+  else if (1u == checkbit(btns.input.l, pinButtonUp))
+  {
+    currentBtnEvt = ButtonEvent::UpEvt;
+  }
+  else if (1u == checkbit(btns.input.l, pinButtonDown))
+  {
+    currentBtnEvt = ButtonEvent::DownEvt;
+  }
+  else
+  {
+    currentBtnEvt = ButtonEvent::ReleaseEvt;
+  }
+
   onEvent(&ShutterMsgs[static_cast <Event>(ShutterEvent::TickEvt)]);
+}
+
+Shutter::~Shutter()
+{
 }

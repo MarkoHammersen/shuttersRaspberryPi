@@ -131,7 +131,6 @@
     <ClCompile Include="..\ABElectronics_CPP_Libraries\IOPi\ABE_IoPi.cpp" />
     <ClCompile Include="..\hsm\cpp\hsm.cpp" />
     <ClCompile Include="..\I2CRelayModule\i2cRelayModule.cpp" />
-    <ClCompile Include="..\src\button.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\shutter.cpp" />
     <ClCompile Include="..\test\test.cpp" />
@@ -141,7 +140,6 @@
     <ClInclude Include="..\ABElectronics_CPP_Libraries\IOPi\ABE_IoPi.h" />
     <ClInclude Include="..\hsm\cpp\hsm.h" />
     <ClInclude Include="..\I2CRelayModule\i2cRelayModule.h" />
-    <ClInclude Include="..\src\button.h" />
     <ClInclude Include="..\src\shutter.h" />
     <ClInclude Include="..\test\test.h" />
   </ItemGroup>

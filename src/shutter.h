@@ -1,6 +1,6 @@
 #pragma once
 
-const uint32_t timeBase = 100u; // in ms
+const uint32_t timeBase = 200u; // in ms
 const uint32_t timeMaxDebounce = 1000u; // in ms
 
 enum class ShutterEvent
@@ -8,7 +8,7 @@ enum class ShutterEvent
   TickEvt
 };
 
-class Shutter: public Hsm, Button
+class Shutter: public Hsm
 {
 protected:
   const char* name;
@@ -28,6 +28,8 @@ protected:
   uint8_t relayUp; // number of relay for up
   I2cRelayModule *relayModule;
 
+  uint8_t pinButtonUp;
+  uint8_t pinButtonDown;
   ButtonEvent currentBtnEvt;
 
   Msg const* topHandler(Msg const* msg);
@@ -38,8 +40,9 @@ protected:
   Msg const* runningHandler(Msg const* msg);
 
 public:
+  ~Shutter();
   Shutter(char const* name,
-    IoPi* buttonIoPi,
+
     uint8_t pinButtonUp,
     uint8_t pinButtonDown,
 
@@ -49,5 +52,7 @@ public:
     
     int32_t timoutShutterInMs);
 
-  void tick(ButtonEvent all);
+  void tick(Buttons& buttons);
+  uint8_t checkbit(uint32_t l, uint8_t bit);
+
 };

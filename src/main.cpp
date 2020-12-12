@@ -76,7 +76,7 @@ static long long doSleep(uint32_t ms)
 #endif
 }
 
-#if 1
+#if 0
 
 static void testTimer()
 {
@@ -106,7 +106,6 @@ int main()
   I2cRelayModule relayBoard1(0x24);
   I2cRelayModule relayBoard2(0x25);
   I2cRelayModule relayBoard3(0x26);
-  
  
   busInput1.set_port_direction(0, 0xFF); // set bank 0 to be inputs
   busInput1.set_port_direction(1, 0xFF); // set bank 1 to be inputs
@@ -122,10 +121,8 @@ int main()
   busInput2.set_port_pullups(1, 0xFF);   // enable internal pullups for bank 0
   busInput2.invert_port(1, 0xFF);		  // invert output so bank will read as 0
 
-  Button all(&busInput1, 11u, 12u);
-
   Shutter hall("hall",
-    &busInput1, 1u, 2u,
+    3u, 4u,
     &relayBoard1, 1u, 2u,
     15000u);
 /*
@@ -177,12 +174,16 @@ int main()
     &busInput2, 9u, 10u,
     15000u);*/
 
+  Buttons buttons = Buttons(1u, 2u);
   while (1u)
   {
     // get status of broadcast input
-    ButtonEvent AllWindowsSig = all.getSignal();
+    buttons.input.b[0u] = busInput1.read_port(0u);
+    buttons.input.b[1u] = busInput1.read_port(1u);
+    buttons.input.b[2u] = busInput2.read_port(0u);
+    buttons.input.b[3u] = busInput2.read_port(1u);
 
-    hall.tick(AllWindowsSig);
+    hall.tick(buttons);
     //bathroom.tick(AllWindowsSig);
     //dirtlock.tick(AllWindowsSig);
     //westDoor.tick(AllWindowsSig);

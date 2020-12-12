@@ -45,6 +45,12 @@ private:
   int _fd;
 };
 
+I2cRelayModule::I2cRelayModule()
+{}
+
+I2cRelayModule::~I2cRelayModule()
+{}
+
 I2cRelayModule::I2cRelayModule(uint8_t addr)
 {
   uint8_t data[2u];

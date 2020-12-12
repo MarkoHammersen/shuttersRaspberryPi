@@ -17,6 +17,8 @@ protected:
   BYTE_TO_WORD modeWord;
  
 public:
+  I2cRelayModule();
+  ~I2cRelayModule();
   I2cRelayModule(uint8_t addr);
   void changeMode(uint8_t channel, uint16_t mode);
   void setAll(uint16_t mode);
