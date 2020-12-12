@@ -40,7 +40,6 @@ protected:
   Msg const* runningHandler(Msg const* msg);
 
 public:
-  ~Shutter();
   Shutter(char const* name,
 
     uint8_t pinButtonUp,

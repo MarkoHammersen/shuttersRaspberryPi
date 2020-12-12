@@ -13,7 +13,6 @@ static const Msg ShutterMsgs[] =
 {
   static_cast <Event>(ShutterEvent::TickEvt)
 };
-
 Shutter::Shutter(char const* name,
   uint8_t pinButtonUp,
   uint8_t pinButtonDown,
@@ -257,11 +256,11 @@ uint8_t Shutter::checkbit(uint32_t l, uint8_t bit)
 
 void Shutter::tick(Buttons& btns)
 {
-  if (1u == checkbit(btns.input.l, btns.pinAllUp))
+  if (1u == checkbit(btns.input.l, btns.getPinAllUp()))
   {
     currentBtnEvt = ButtonEvent::UpEvt;
   }
-  else if (1u == checkbit(btns.input.l, btns.pinAllDown))
+  else if (1u == checkbit(btns.input.l, btns.getPinAllDown()))
   {
     currentBtnEvt = ButtonEvent::DownEvt;
   }
@@ -279,8 +278,4 @@ void Shutter::tick(Buttons& btns)
   }
 
   onEvent(&ShutterMsgs[static_cast <Event>(ShutterEvent::TickEvt)]);
-}
-
-Shutter::~Shutter()
-{
 }

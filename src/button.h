@@ -17,14 +17,19 @@ enum class ButtonEvent
 
 class Buttons
 {
-public:
+protected:
   uint8_t pinAllUp;
   uint8_t pinAllDown;
+
+public:
   AllInputs input;
   Buttons(uint8_t u, uint8_t d)
   {
     pinAllUp = u;
     pinAllDown = d;
+    input.l = 0u;
   };
+  uint8_t getPinAllUp() { return pinAllUp; }
+  uint8_t getPinAllDown() { return pinAllDown; }
 };
 

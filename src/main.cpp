@@ -121,58 +121,21 @@ int main()
   busInput2.set_port_pullups(1, 0xFF);   // enable internal pullups for bank 0
   busInput2.invert_port(1, 0xFF);		  // invert output so bank will read as 0
 
-  Shutter hall("hall",
-    3u, 4u,
-    &relayBoard1, 1u, 2u,
-    15000u);
-/*
-  window bathroom("bathroom",
-    &busInput1, 3u, 4u,
-    15000u);
-
-  window dirtlock("dirtlock",
-    &busInput1, 5u, 6u,
-    15000u);
-
-  window westDoor("westDoor",
-    &busInput1, 7u, 8u,
-    15000u);
-
-  window westWindow("westWindow",
-    &busInput1, 9u, 10u,
-    15000u);
-
-  window northWindow("northWindow",
-    &busInput1, 11u, 12u,
-    15000u);
-
-  window eastWindowSmall("eastWindowSmall",
-    &busInput1, 13u, 14u,
-    15000u);
-
-  window northDoor("northDoor",
-    &busInput1, 15u, 16u,
-    15000u);
-
-  window eastWindowDining("eastWindowDining",
-    &busInput2, 1u, 2u,
-    15000u);
-
-  window eastWindowKitchen("eastWindowKitchen",
-    &busInput2, 3u, 4u,
-    15000u);
-
-  window eastDoor("eastDoor",
-    &busInput2, 5u, 6u,
-    15000u);
-
-  window southWindowLarge("southWindowLarge",
-    &busInput2, 7u, 8u,
-    15000u);
-
-  window southWindowSmall("southWindowSmall",
-    &busInput2, 9u, 10u,
-    15000u);*/
+  Shutter shutter[] = {
+    Shutter("hall", 3u, 4u, &relayBoard1, 1u, 2u, 15000u),
+    Shutter("bathroom",5u,6u, &relayBoard1, 3u, 4u, 15000u),
+    Shutter("dirtlock",7u,8u,&relayBoard1, 5u, 6u,15000u),
+    Shutter("westDoor", 7u,8u,&relayBoard1, 7u, 8u, 15000u),
+    Shutter("westWindow", 7u,8u,&relayBoard1, 9u, 10u, 15000u),
+    Shutter("northWindow", 7u,8u,&relayBoard1, 11u, 12u, 15000u),
+    Shutter("eastWindowSmall", 7u,8u,&relayBoard1, 13u, 14u, 15000u),
+    Shutter("northDoor", 7u,8u,&relayBoard1, 15u, 16u, 15000u),
+    Shutter("eastWindowDining", 7u,8u,&relayBoard1, 1u, 2u, 15000u),
+    Shutter("eastWindowKitchen", 7u,8u,&relayBoard1, 3u, 4u, 15000u),
+    Shutter("eastDoor", 7u,8u,&relayBoard1, 5u, 6u, 15000u),
+    Shutter("southWindowLarge", 7u,8u,&relayBoard1, 7u, 8u, 15000u),
+    Shutter("southWindowSmall", 7u,8u,&relayBoard1, 9u, 10u, 15000u)
+  };
 
   Buttons buttons = Buttons(1u, 2u);
   while (1u)
@@ -183,20 +146,11 @@ int main()
     buttons.input.b[2u] = busInput2.read_port(0u);
     buttons.input.b[3u] = busInput2.read_port(1u);
 
-    hall.tick(buttons);
-    //bathroom.tick(AllWindowsSig);
-    //dirtlock.tick(AllWindowsSig);
-    //westDoor.tick(AllWindowsSig);
-    //westWindow.tick(AllWindowsSig);
-    //northWindow.tick(AllWindowsSig);
-    //eastWindowSmall.tick(AllWindowsSig);
-    //northDoor.tick(AllWindowsSig);
-    //eastWindowDining.tick(AllWindowsSig);
-    //eastWindowKitchen.tick(AllWindowsSig);
-    //eastDoor.tick(AllWindowsSig);
-    //southWindowLarge.tick(AllWindowsSig);
-    //southWindowSmall.tick(AllWindowsSig);
-
+    for(uint32_t i = 0u; i < (sizeof(shutter)/sizeof(*shutter)); i++)
+    {
+      shutter[i].tick(buttons);
+    }
+  
     (void)doSleep(timeBase); // in ms
   }
 
